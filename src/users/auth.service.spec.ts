@@ -10,10 +10,17 @@ describe('AuthService', () => {
 
     beforeEach(async () => {
     //Cretae a fake copy of UserService
-
+    const users: User[]= [];
     fakeUserService = {
-        find: () => Promise.resolve([]),
-        create: (email: string, password: string) => Promise.resolve({id: 1, email, password} as User)
+        find: (email: string) => {
+            const filteredUser = users.filter(user => user.email === email)
+            return Promise.resolve(filteredUser);
+        },
+        create: (email: string, password: string) => {
+            const user ={id: (Math.random() * 9999), email, password} as User
+            users.push(user);
+            return Promise.resolve(user);
+        }
     };
     const module = await Test.createTestingModule({
         providers : [
@@ -42,14 +49,27 @@ describe('AuthService', () => {
     })
 
     it('throws an error if user signs up with email that is in use', async ()=> {
-        fakeUserService.find = () => Promise.resolve([{id:1, email:'prova@gmail.com', password: 'prova'} as User])
+        await service.signup('mario@gmail.com', 'mario');
         
-        await expect(service.signup('prova@gmail.com', 'prova')).rejects.toThrow(
+        await expect(service.signup('mario@gmail.com', 'prova')).rejects.toThrow(
             BadRequestException,
         );
     })
 
     it('throws if signin is called with an unused email', async ()=>{
         await expect(service.signin('pippo@gmail.com', 'pippo')).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws if an invalid password is provided', async ()=>{
+        await service.signup('mario@gmail.com', 'mario')
+        await expect(
+            service.signin('mario@gmail.com', 'stefano'),
+           ).rejects.toThrow(BadRequestException)
+
+    });
+    it('return a user if correct password is provided', async ()=>{
+        await service.signup('mario@gmail.com', 'mario')
+        const user = await service.signin('mario@gmail.com', 'mario')
+            expect(user).toBeDefined();
     });
 });
