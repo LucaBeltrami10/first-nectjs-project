@@ -48,4 +48,8 @@ describe('AuthService', () => {
             BadRequestException,
         );
     })
+
+    it('throws if signin is called with an unused email', async ()=>{
+        await expect(service.signin('pippo@gmail.com', 'pippo')).rejects.toThrow(NotFoundException);
+    });
 });
