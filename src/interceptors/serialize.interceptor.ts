@@ -20,7 +20,7 @@ export class SerializeInterceptor implements NestInterceptor{
         return handler.handle().pipe(
             map((data: any) => {
                 return plainToClass(this.dto, data, {
-                    // rimossi valori estranei a UserDto
+                    // rimossi valori estranei a UserDto (così: this.dto in base al dto che unseriamo in Serialize(..). risolto problema in report)
                     excludeExtraneousValues : true,
                 })
             })
