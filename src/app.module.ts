@@ -50,13 +50,14 @@ const cookieSession = require('cookie-session');
 
   ],
 })
-export class AppModule {
 
+export class AppModule {
+  constructor(private configService: ConfigService){}
   //COOKIE SESSION APPLICATO GLOBALMENTE A TUTTE LE ROUTES (PRIMA IN MAIN MA PER TEXT E2E è STATO SPOSTATO QUI IN APP,MODULE)
   configure(consumer: MiddlewareConsumer){
     consumer.apply(cookieSession({
       // stringa casuale per criptare le info memorizzate all'interno dei cookie
-      keys: ['Canestro78']
+      keys: [this.configService.get('COOKIE_KEY')]
     })).forRoutes('*');
   }
 }
